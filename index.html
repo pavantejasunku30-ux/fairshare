@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FairShare Elite</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --green: #16a34a;
+            --red: #dc2626;
+            --share-btn: #0284c7;
+            --share-btn-hover: #0369a1;
+            --purple: #7c3aed;
+            --dark: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 550px;
+            box-sizing: border-box;
+        }
+
+        h1 { margin-top: 0; font-size: 24px; text-align: center; color: var(--primary); }
+        h2 { font-size: 16px; margin: 20px 0 10px 0; border-bottom: 2px solid var(--bg); padding-bottom: 5px; }
+
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #fff; -webkit-appearance: none; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+
+        .flex-group { display: flex; gap: 10px; }
+        button { background-color: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent;}
+        button:hover { background-color: var(--primary-hover); }
+
+        .share-button {
+            background-color: var(--share-btn);
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 15px;
+            display: none;
+        }
+        .share-button:hover { background-color: var(--share-btn-hover); }
+
+        .chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .chip { background: #f1f5f9; color: var(--text); padding: 6px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; border: 1px solid var(--border);}
+        .chip.me { background: #eef2ff; color: var(--primary); border-color: #c7d2fe; font-weight: 600;}
+        .chip .remove { color: var(--red); cursor: pointer; font-weight: bold; padding: 0 2px; }
+
+        .checkbox-grid { 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 8px 0; 
+            max-height: 160px; 
+            overflow-y: auto; 
+            padding: 12px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+        
+        .checkbox-label { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            min-width: calc(50% - 12px); 
+            box-sizing: border-box;
+            padding: 4px 0;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+            -webkit-appearance: checkbox; 
+        }
+
+        .checkbox-label span {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .shares-grid { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: #fdfdfd; max-height: 150px; overflow-y: auto;}
+        .share-input-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .share-input-row input { width: 70px; padding: 6px 8px; font-size: 13px; text-align: center; -webkit-appearance: none;}
+
+        .expense-list { max-height: 180px; overflow-y: auto; background: #fafafa; border-radius: 8px; padding: 5px; }
+        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .expense-item:last-child { border-bottom: none; }
+        .expense-details { display: flex; flex-direction: column; gap: 2px;}
+        .meta-tag { font-size: 11px; color: var(--text-light); }
+
+        .dashboard-box { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-top: 15px; }
+        .status-header { font-size: 15px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .status-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px dashed var(--border);}
+        .status-row:last-child { border-bottom: none; }
+        
+        .owed-to-me { color: var(--green); font-weight: 600; }
+        .i-owe { color: var(--red); font-weight: 600; }
+        .settled { color: var(--text-light); font-style: italic;}
+        
+        .backup-btn { background-color: var(--dark); margin-top: 10px; width: 100%;}
+        .backup-btn:hover { background-color: #1e293b; }
+        
+        .clear-storage-btn { background-color: #be123c; width: 100%; margin-top: 10px;}
+        .clear-storage-btn:hover { background-color: #9f1239; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💸 FairShare Elite</h1>
+    
+    <div>
+        <h2>1. Group Members</h2>
+        <div class="flex-group">
+            <input type="text" id="friendName" placeholder="Add friend's name...">
+            <button onclick="addFriend()">Add Friend</button>
+        </div>
+        <div class="chip-list" id="friendChips"></div>
+    </div>
+
+    <div>
+        <h2>2. Log an Expense</h2>
+        <div class="flex-group" style="margin-bottom: 8px;">
+            <input type="text" id="itemName" placeholder="Item details (e.g., Dinner, Cab)" style="flex: 2;">
+            <input type="number" id="itemCost" placeholder="Cost (₹)" min="0" step="0.01" style="flex: 1;">
+        </div>
+        
+        <div class="flex-group" style="margin-bottom: 10px;">
+            <div style="width: 50%;">
+                <label for="itemPayer">Who paid?</label>
+                <select id="itemPayer"></select>
+            </div>
+            <div style="width: 50%;">
+                <label for="splitMethod">Method</label>
+                <select id="splitMethod" onchange="toggleSplitMethodLayout()">
+                    <option value="equal">Equally</option>
+                    <option value="shares">By Shares</option>
+                </select>
+            </div>
+        </div>
+
+        <label>Who splits the cost of this item?</label>
+        <div class="checkbox-grid" id="checkboxGrid"></div>
+        
+        <div id="sharesAllocationSection" style="display: none;">
+            <label>Assign Shares for each participant:</label>
+            <div class="shares-grid" id="sharesInputsGrid"></div>
+        </div>
+        
+        <button style="width: 100%; margin-top: 10px;" onclick="addExpense()">Add To Ledger</button>
+    </div>
+
+    <div id="receiptSection" style="display:none;">
+        <h2>Receipt Ledger</h2>
+        <div class="expense-list" id="expenseList"></div>
+    </div>
+
+    <div class="dashboard-box" id="individualSummaryDashboard" style="display:none; border-left: 5px solid var(--purple);">
+        <div class="status-header" style="color: var(--purple);">Individual Summaries Breakdown</div>
+        <div id="individualTotals"></div>
+    </div>
+
+    <div class="dashboard-box" id="settlementDashboard" style="display:none; border-left: 5px solid var(--green);">
+        <div class="status-header" style="color: var(--green);">Optimized Group Settlements</div>
+        <div id="groupSettlements"></div>
+    </div>
+
+    <button class="share-button" id="shareBtn" onclick="copyShareText()">📋 Copy Share Summary</button>
+
+    <div>
+        <h2>Data Management</h2>
+        <textarea id="backupStringArea" rows="3" placeholder="Paste backup text data here to reload an old session..."></textarea>
+        <div class="flex-group">
+            <button class="backup-btn" onclick="exportDataString()">💾 Export</button>
+            <button class="backup-btn" style="background-color: var(--primary);" onclick="importDataString()">📂 Import</button>
+        </div>
+        <button class="clear-storage-btn" onclick="clearAllData()">🗑️ Reset Entire App</button>
+    </div>
+</div>
+
+<script>
+    let friends = ['You'];
+    let expenses = []; 
+    let globalShareText = ""; 
+
+    function saveToLocalStorage() {
+        try {
+            const payload = { f: friends, e: expenses };
+            localStorage.setItem('fairshare_elite_data', JSON.stringify(payload));
+        } catch(e) {
+            console.warn("Storage write restricted by sandbox context", e);
+        }
+    }
+
+    function loadFromLocalStorage() {
+        try {
+            const saved = localStorage.getItem('fairshare_elite_data');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.f && parsed.e) {
+                    friends = parsed.f;
+                    expenses = parsed.e;
+                }
+            }
+        } catch (e) {
+            console.warn("Storage read blocked context. Running gracefully in memory.", e);
+        }
+    }
+
+    function updateUI() {
+        renderFriends();
+        renderDropdowns();
+        renderCheckboxGrid();
+        toggleSplitMethodLayout(); 
+        renderExpenses();
+        calculateDebts();
+        
+        if(expenses.length > 0) {
+            document.getElementById('receiptSection').style.display = 'block';
+        } else {
+            document.getElementById('receiptSection').style.display = 'none';
+        }
+        
+        saveToLocalStorage();
+    }
+
+    function renderFriends() {
+        const container = document.getElementById('friendChips');
+        container.innerHTML = '';
+        friends.forEach((friend, index) => {
+            const chip = document.createElement('div');
+            chip.className = `chip ${friend === 'You' ? 'me' : ''}`;
+            chip.innerHTML = `
+                ${friend} 
+                ${friend !== 'You' ? `<span class="remove" onclick="removeFriend(${index})">×</span>` : ''}
+            `;
+            container.appendChild(chip);
+        });
+    }
+
+    function renderDropdowns() {
+        const payerSelect = document.getElementById('itemPayer');
+        const currentSelection = payerSelect.value;
+        payerSelect.innerHTML = '';
+        
+        friends.forEach(friend => {
+            const opt = document.createElement('option');
+            opt.value = friend;
+            opt.innerText = friend;
+            payerSelect.appendChild(opt);
+        });
+        
+        if(currentSelection && friends.includes(currentSelection)) {
+            payerSelect.value = currentSelection;
+        } else {
+            payerSelect.value = friends[0];
+        }
+    }
+
+    function renderCheckboxGrid() {
+        const grid = document.getElementById('checkboxGrid');
+        const checkedMap = {};
+        
+        grid.querySelectorAll('input[name="consumer"]').forEach(cb => {
+            checkedMap[cb.value] = cb.checked;
+        });
+
+        grid.innerHTML = '';
+        friends.forEach(friend => {
+            const isChecked = checkedMap[friend] !== undefined ? checkedMap[friend] : true;
+            const label = document.createElement('label');
+            label.className = 'checkbox-label';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'consumer';
+            checkbox.value = friend;
+            checkbox.checked = isChecked;
+            checkbox.onchange = toggleSplitMethodLayout;
+            
+            const span = document.createElement('span');
+            span.innerText = friend;
+            
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            grid.appendChild(label);
+        });
+    }
+
+    function toggleSplitMethodLayout() {
+        const method = document.getElementById('splitMethod').value;
+        const sharesSection = document.getElementById('sharesAllocationSection');
+        const sharesGrid = document.getElementById('sharesInputsGrid');
+        
+        if (method === 'equal') {
+            sharesSection.style.display = 'none';
+            return;
+        }
+
+        const checkedBoxes = document.querySelectorAll('input[name="consumer"]:checked');
+        const currentVals = {};
+        sharesGrid.querySelectorAll('.share-input-row').forEach(row => {
+            const name = row.dataset.name;
+            const inputVal = row.querySelector('input').value;
+            currentVals[name] = inputVal;
+        });
+
+        sharesGrid.innerHTML = '';
+        
+        if (checkedBoxes.length === 0) {
+            sharesGrid.innerHTML = '<div style="font-size:12px; color:var(--text-light); font-style:italic;">Select consumers above first...</div>';
+        } else {
+            checkedBoxes.forEach(cb => {
+                const name = cb.value;
+                const oldVal = currentVals[name] !== undefined ? currentVals[name] : "1";
+                
+                const row = document.createElement('div');
+                row.className = 'share-input-row';
+                row.dataset.name = name;
+                row.innerHTML = `
+                    <span><b>${name}</b>'s shares</span>
+                    <input type="number" min="0.1" step="any" value="${oldVal}" id="share_val_${name}">
+                `;
+                sharesGrid.appendChild(row);
+            });
+        }
+        
+        sharesSection.style.display = 'block';
+    }
+
+    function addFriend() {
+        const input = document.getElementById('friendName');
+        const name = input.value.trim();
+        if (name && !friends.includes(name)) {
+            friends.push(name);
+            input.value = '';
+            updateUI();
+        }
+    }
+
+    function removeFriend(index) {
+        const deadFriend = friends[index];
+        friends.splice(index, 1);
+        expenses = expenses.filter(exp => exp.payer !== deadFriend);
+        expenses.forEach(exp => {
+            if(exp.splitType === 'shares' && exp.sharesMap) {
+                delete exp.sharesMap[deadFriend];
+            }
+            exp.sharedWith = exp.sharedWith.filter(f => f !== deadFriend);
+        });
+        expenses = expenses.filter(exp => exp.sharedWith.length > 0);
+        updateUI();
+    }
+
+    function addExpense() {
+        const nameIn = document.getElementById('itemName');
+        const costIn = document.getElementById('itemCost');
+        const payerIn = document.getElementById('itemPayer');
+        const splitMethod = document.getElementById('splitMethod').value;
+        const checkedBoxes = document.querySelectorAll('input[name="consumer"]:checked');
+        
+        const name = nameIn.value.trim() || "Shared Expense";
+        const cost = parseFloat(costIn.value);
+        const payer = payerIn.value || 'You'; 
+
+        if (isNaN(cost) || cost <= 0) {
+            alert("Please input a valid cost amount.");
+            return;
+        }
+        if (checkedBoxes.length === 0) {
+            alert("Please pick at least one person sharing the expense.");
+            return;
+        }
+
+        const sharedWith = Array.from(checkedBoxes).map(cb => cb.value);
+        let sharesMap = null;
+
+        if (splitMethod === 'shares') {
+            sharesMap = {};
+            for (let i = 0; i < sharedWith.length; i++) {
+                const p = sharedWith[i];
+                const inputEl = document.getElementById(`share_val_${p}`);
+                const val = inputEl ? parseFloat(inputEl.value) : 1;
+                
+                if (isNaN(val) || val <= 0) {
+                    alert(`Please input a valid share count strictly greater than 0 for ${p}.`);
+                    return;
+                }
+                sharesMap[p] = val;
+            }
+        }
+
+        expenses.push({ name, cost, payer, sharedWith, splitType: splitMethod, sharesMap });
+
+        nameIn.value = '';
+        costIn.value = '';
+        document.getElementById('splitMethod').value = 'equal';
+        updateUI();
+    }
+
+    function deleteExpense(index) {
+        expenses.splice(index, 1);
+        updateUI();
+    }
+
+    function renderExpenses() {
+        const list = document.getElementById('expenseList');
+        list.innerHTML = '';
+        expenses.forEach((exp, idx) => {
+            const div = document.createElement('div');
+            div.className = 'expense-item';
+            
+            let splitMetaStr = "";
+            if (exp.splitType === 'shares') {
+                const breakdownParts = exp.sharedWith.map(p => `${p} (${exp.sharesMap[p]}sh)`);
+                splitMetaStr = `Shares split among: ${breakdownParts.join(', ')}`;
+            } else {
+                splitMetaStr = `Equal split among: ${exp.sharedWith.join(', ')}`;
+            }
+
+            div.innerHTML = `
+                <div class="expense-details">
+                    <strong>${exp.name}</strong>
+                    <span class="meta-tag">Paid by <b>${exp.payer}</b> • ${splitMetaStr}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-weight:700;">₹${exp.cost.toFixed(2)}</span>
+                    <button onclick="deleteExpense(${idx})" style="background:none; color:var(--red); padding:0;">Delete</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function calculateDebts() {
+        const individualBox = document.getElementById('individualSummaryDashboard');
+        const settlementBox = document.getElementById('settlementDashboard');
+        const shareBtn = document.getElementById('shareBtn');
+        const individualTotalsDiv = document.getElementById('individualTotals');
+        const groupSettlementsDiv = document.getElementById('groupSettlements');
+
+        if(expenses.length === 0) {
+            individualBox.style.display = 'none';
+            settlementBox.style.display = 'none';
+            shareBtn.style.display = 'none';
+            return;
+        }
+
+        let netBalances = {};
+        let totalPaidByPerson = {};
+        
+        friends.forEach(f => {
+            netBalances[f] = 0;
+            totalPaidByPerson[f] = 0;
+        });
+
+        let totalBillSum = 0;
+        expenses.forEach(exp => {
+            totalBillSum += exp.cost;
+            netBalances[exp.payer] += exp.cost;
+            totalPaidByPerson[exp.payer] += exp.cost; 
+            
+            if (exp.splitType === 'shares') {
+                let cumulativeShares = 0;
+                exp.sharedWith.forEach(person => {
+                    cumulativeShares += (exp.sharesMap[person] || 0);
+                });
+
+                exp.sharedWith.forEach(person => {
+                    const individualWeight = exp.sharesMap[person] || 0;
+                    const calculatedShare = (individualWeight / cumulativeShares) * exp.cost;
+                    netBalances[person] -= calculatedShare;
+                });
+            } else {
+                const splitShare = exp.cost / exp.sharedWith.length;
+                exp.sharedWith.forEach(person => {
+                    netBalances[person] -= splitShare;
+                });
+            }
+        });
+
+        let debtors = [];
+        let creditors = [];
+        for (let p in netBalances) {
+            if (netBalances[p] > 0.01) creditors.push({name: p, amt: netBalances[p]});
+            else if (netBalances[p] < -0.01) debtors.push({name: p, amt: Math.abs(netBalances[p])});
+        }
+
+        let transactions = [];
+        let debtIdx = 0, credIdx = 0;
+        
+        let dCopy = JSON.parse(JSON.stringify(debtors));
+        let cCopy = JSON.parse(JSON.stringify(creditors));
+
+        while(debtIdx < dCopy.length && credIdx < cCopy.length) {
+            let debtor = dCopy[debtIdx];
+            let creditor = cCopy[credIdx];
+            let payment = Math.min(debtor.amt, creditor.amt);
+
+            transactions.push({ from: debtor.name, to: creditor.name, amount: payment });
+
+            debtor.amt -= payment;
+            creditor.amt -= payment;
+
+            if(debtor.amt <= 0.01) debtIdx++;
+            if(creditor.amt <= 0.01) credIdx++;
+        }
+
+        individualTotalsDiv.innerHTML = '';
+        friends.forEach(f => {
+            const row = document.createElement('div');
+            row.className = 'status-row';
+            
+            let paidStr = `Paid: <b>₹${totalPaidByPerson[f].toFixed(2)}</b>`;
+            let statusStr = "";
+            let net = netBalances[f];
+
+            if (net > 0.01) {
+                statusStr = `<span class="owed-to-me">Owed ₹${net.toFixed(2)}</span>`;
+            } else if (net < -0.01) {
+                statusStr = `<span class="i-owe">Owes ₹${Math.abs(net).toFixed(2)}</span>`;
+            } else {
+                statusStr = `<span class="settled">Square</span>`;
+            }
+
+            row.innerHTML = `<span><b>${f}</b> (${paidStr})</span> ${statusStr}`;
+            individualTotalsDiv.appendChild(row);
+        });
+
+        groupSettlementsDiv.innerHTML = '';
+        if(transactions.length === 0) {
+            groupSettlementsDiv.innerHTML = '<div class="settled" style="font-size:13px;">No payments required.</div>';
+        } else {
+            transactions.forEach(t => {
+                const row = document.createElement('div');
+                row.className = 'status-row';
+                row.innerHTML = `<span>👉 <b>${t.from}</b> pays <b>${t.to}</b></span> <span style="font-weight:600; color:var(--primary);">₹${t.amount.toFixed(2)}</span>`;
+                groupSettlementsDiv.appendChild(row);
+            });
+        }
+
+        let textBuild = `━━━ 💸 FAIRSHARE BILL BREAKDOWN ━━━\n`;
+        textBuild += `Total Bill Value: ₹${totalBillSum.toFixed(2)}\n\n`;
+        textBuild += `🛒 ITEMIZED RECEIPT:\n`;
+        expenses.forEach(e => {
+            if(e.splitType === 'shares') {
+                const subParts = e.sharedWith.map(p => `${p} (${e.sharesMap[p]} sh)`);
+                textBuild += ` • ${e.name}: ₹${e.cost.toFixed(2)} (Paid by ${e.payer} • Weighted Share: ${subParts.join(', ')})\n`;
+            } else {
+                textBuild += ` • ${e.name}: ₹${e.cost.toFixed(2)} (Paid by ${e.payer} • Split equally: ${e.sharedWith.join(', ')})\n`;
+            }
+        });
+        
+        textBuild += `\n🎯 FINAL SETTLEMENT INSTRUCTIONS:\n`;
+        if(transactions.length === 0) {
+            textBuild += ` Everyone is square! No balances due.\n`;
+        } else {
+            transactions.forEach(t => {
+                textBuild += ` 👉 ${t.from} pays ${t.to} ➔ ₹${t.amount.toFixed(2)}\n`;
+            });
+        }
+        textBuild += `━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+        globalShareText = textBuild;
+
+        individualBox.style.display = 'block';
+        settlementBox.style.display = 'block';
+        shareBtn.style.display = 'block';
+    }
+
+    function exportDataString() {
+        const payload = { f: friends, e: expenses };
+        const encodedString = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        const textContainer = document.getElementById('backupStringArea');
+        textContainer.value = encodedString;
+        textContainer.select();
+        textContainer.setSelectionRange(0, 99999);
+        try {
+            document.execCommand('copy');
+            alert("Data exported and copied to clipboard successfully!");
+        } catch(err) {
+            alert("Data generated in textbox below. Please copy it manually.");
+        }
+    }
+
+    function importDataString() {
+        const rawInput = document.getElementById('backupStringArea').value.trim();
+        if(!rawInput) {
+            alert("Please paste a valid data string into the text box first.");
+            return;
+        }
+        try {
+            const decodedString = decodeURIComponent(escape(atob(rawInput)));
+            const parsed = JSON.parse(decodedString);
+            if(parsed.f && parsed.e) {
+                friends = parsed.f;
+                expenses = parsed.e;
+                updateUI();
+                alert("🎉 Data successfully imported and restored!");
+                document.getElementById('backupStringArea').value = "";
+            } else {
+                throw new Error();
+            }
+        } catch(err) {
+            alert("Invalid data string. Make sure you copied the full uninterrupted code block.");
+        }
+    }
+
+    function clearAllData() {
+        if(confirm("Are you sure you want to clear your current tab data completely? This will wipe out all tracked entries permanently.")) {
+            try { localStorage.removeItem('fairshare_elite_data'); } catch(e){}
+            friends = ['You'];
+            expenses = [];
+            updateUI();
+        }
+    }
+
+    function copyShareText() {
+        const dummyArea = document.createElement('textarea');
+        dummyArea.value = globalShareText;
+        dummyArea.style.position = 'absolute';
+        dummyArea.style.left = '-9999px';
+        document.body.appendChild(dummyArea);
+        dummyArea.select();
+        dummyArea.setSelectionRange(0, 99999);
+        try {
+            document.execCommand('copy');
+            const btn = document.getElementById('shareBtn');
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Summary Copied!";
+            btn.style.backgroundColor = "#16a34a";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.backgroundColor = "var(--share-btn)";
+            }, 2000);
+        } catch (err) {
+            alert("Fallback copy block active. Please select and copy directly.");
+        }
+        document.body.removeChild(dummyArea);
+    }
+
+    window.onload = function() {
+        loadFromLocalStorage();
+        updateUI();
+    };
+</script>
+
+</body>
+</html>
